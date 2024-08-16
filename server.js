@@ -25,7 +25,7 @@ const client = new MongoClient(uri, {
 });
 async function run() {
   try {
-    const craftCollection = client.db("jtassignment").collection("products");
+    const craftCollection = client.db("jtassignment").collection("product");
 
     // get all products
     app.get("/product", async (req, res) => {
@@ -41,7 +41,8 @@ async function run() {
         const minPrice = parseFloat(req.query.minPrice) || 0;
         const maxPrice =
           parseFloat(req.query.maxPrice) || Number.MAX_SAFE_INTEGER;
-// console.log(category,brand,minPrice,maxPrice);
+        const search = req.query.search || "";
+        // console.log(category,brand,minPrice,maxPrice,search);
 
         // Create the query object dynamically based on the provided filters
         const query = {};
@@ -49,23 +50,28 @@ async function run() {
         if (brand) query.brand = brand;
         if (minPrice || maxPrice)
           query.price = { $gte: minPrice, $lte: maxPrice };
+        if (search) {
+          query.name = { $regex: search, $options: "i" };
+        }
 
+        // Calculate pagination parameters
         const startIndex = (page - 1) * limit;
-        const totalProducts = await craftCollection.countDocuments(query); 
+        const totalProducts = await craftCollection.countDocuments(query);
 
-        const products = await craftCollection.find(query)
-        .sort({ [sortField]: sortOrder })
-        .skip(startIndex)
-        .limit(limit)
-        .toArray();
+        // Fetch products with filtering, sorting, and pagination
+        const products = await craftCollection
+          .find(query)
+          .sort({ [sortField]: sortOrder })
+          .skip(startIndex)
+          .limit(limit)
+          .toArray();
 
-    res.json({
-        totalProducts,
-        currentPage: page,
-        totalPages: Math.ceil(totalProducts / limit),
-        products
-    });
-      
+        res.json({
+          totalProducts,
+          currentPage: page,
+          totalPages: Math.ceil(totalProducts / limit),
+          products,
+        });
       } catch (error) {
         res.json(error.message);
       }

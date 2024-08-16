@@ -29,8 +29,27 @@ async function run() {
 
     // get all products
     app.get("/product", async (req, res) => {
-      const products = await craftCollection.find().toArray();
-      res.json(products);
+      try {
+        const page = parseInt(req.query.page) || 1;
+        const limit = parseInt(req.query.limit) || 10;
+        const startIndex = (page - 1) * limit;
+        const totalProducts = await craftCollection.countDocuments();
+        const products = await craftCollection
+          .find()
+          .sort({ createdAt: -1 }) // Sort by date, most recent first
+          .skip(startIndex)
+          .limit(limit)
+          .toArray();
+        // console.log(page,limit,startIndex,totalProducts);
+        res.json({
+          totalProducts,
+          currentPage: page,
+          totalPages: Math.ceil(totalProducts / limit),
+          products,
+        });
+      } catch (error) {
+        res.json(error.message);
+      }
     });
 
     console.log(

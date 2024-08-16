@@ -57,7 +57,7 @@ async function run() {
         .sort({ [sortField]: sortOrder })
         .skip(startIndex)
         .limit(limit)
-        
+        .toArray();
 
     res.json({
         totalProducts,

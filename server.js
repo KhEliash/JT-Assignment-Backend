@@ -34,21 +34,23 @@ async function run() {
         const limit = parseInt(req.query.limit) || 10;
         const sortField = req.query.sortField || "createdAt";
         const sortOrder = req.query.sortOrder === "asc" ? 1 : -1;
-        const startIndex = (page - 1) * limit;
-        const totalProducts = await craftCollection.countDocuments();
-        const products = await craftCollection
-          .find()
-          .sort({ [sortField]: sortOrder }) // Sort by date, most recent first
-          .skip(startIndex)
-          .limit(limit)
-          .toArray();
-        // console.log(page,limit,startIndex,totalProducts);
-        res.json({
-          totalProducts,
-          currentPage: page,
-          totalPages: Math.ceil(totalProducts / limit),
-          products,
-        });
+
+        // Filters
+        const category = req.query.category;
+        const brand = req.query.brand;
+        const minPrice = parseFloat(req.query.minPrice) || 0;
+        const maxPrice =
+          parseFloat(req.query.maxPrice) || Number.MAX_SAFE_INTEGER;
+console.log(category,brand,minPrice,maxPrice);
+   
+
+    res.json({
+        totalProducts,
+        currentPage: page,
+        totalPages: Math.ceil(totalProducts / limit),
+        products
+    });
+      
       } catch (error) {
         res.json(error.message);
       }

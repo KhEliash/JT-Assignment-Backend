@@ -8,7 +8,11 @@ const port = process.env.PORT || 5000;
 // Middleware
 app.use(
   cors({
-    origin: ["http://localhost:5173"],
+    origin: [
+      "http://localhost:5173",
+      "https://jtassignment-82f3c.web.app",
+      "https://jtassignment-82f3c.firebaseapp.com",
+    ],
   })
 );
 app.use(express.json());
@@ -25,7 +29,7 @@ const client = new MongoClient(uri, {
 });
 async function run() {
   try {
-    const craftCollection = client.db("jtassignment").collection("product");
+    const craftCollection = client.db("jtassignment").collection("productsall");
 
     // get all products
     app.get("/product", async (req, res) => {

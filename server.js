@@ -41,8 +41,23 @@ async function run() {
         const minPrice = parseFloat(req.query.minPrice) || 0;
         const maxPrice =
           parseFloat(req.query.maxPrice) || Number.MAX_SAFE_INTEGER;
-console.log(category,brand,minPrice,maxPrice);
-   
+// console.log(category,brand,minPrice,maxPrice);
+
+        // Create the query object dynamically based on the provided filters
+        const query = {};
+        if (category) query.category = category;
+        if (brand) query.brand = brand;
+        if (minPrice || maxPrice)
+          query.price = { $gte: minPrice, $lte: maxPrice };
+
+        const startIndex = (page - 1) * limit;
+        const totalProducts = await craftCollection.countDocuments(query); 
+
+        const products = await craftCollection.find(query)
+        .sort({ [sortField]: sortOrder })
+        .skip(startIndex)
+        .limit(limit)
+        
 
     res.json({
         totalProducts,

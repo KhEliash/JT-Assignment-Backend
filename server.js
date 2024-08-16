@@ -32,11 +32,13 @@ async function run() {
       try {
         const page = parseInt(req.query.page) || 1;
         const limit = parseInt(req.query.limit) || 10;
+        const sortField = req.query.sortField || "createdAt";
+        const sortOrder = req.query.sortOrder === "asc" ? 1 : -1;
         const startIndex = (page - 1) * limit;
         const totalProducts = await craftCollection.countDocuments();
         const products = await craftCollection
           .find()
-          .sort({ createdAt: -1 }) // Sort by date, most recent first
+          .sort({ [sortField]: sortOrder }) // Sort by date, most recent first
           .skip(startIndex)
           .limit(limit)
           .toArray();
